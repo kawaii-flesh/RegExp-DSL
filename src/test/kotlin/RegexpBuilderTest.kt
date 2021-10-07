@@ -10,23 +10,16 @@ class RegexBuilderTest
         makeRegexpAsString()
         {
             beginLine()
-            characterClass()
+            for(i in 0..1)
             {
-                range('a', 'z')
-                range('A', 'Z')
-                range('0', '9')
-                string("+_.-")
+                characterClass()
+                {
+                    range('a' to 'z', 'A' to 'Z', '0' to '9')
+                    string(if(i == 0) "+_.-" else ".-")
+                }
+                oneOrMore()
+                if(i == 0) character('@')
             }
-            oneOrMore()
-            character('@')
-            characterClass()
-            {
-                range('a', 'z')
-                range('A', 'Z')
-                range('0', '9')
-                string(".-")
-            }
-            oneOrMore()
             endLine()
         }
 
@@ -45,8 +38,7 @@ class RegexBuilderTest
                 {
                     characterClass()
                     {
-                        range('A', 'Z')
-                        range('a', 'z')
+                        range('A' to 'Z', 'a' to 'z')
                     }
                     missingOrMore()
                     characterClass()
@@ -58,8 +50,7 @@ class RegexBuilderTest
                 {
                     characterClass()
                     {
-                        range('0', '9')
-                        range('A', 'Z')
+                        range('0' to '9', 'A' to 'Z')
                     }
                     missingOrMore()
                     characterClass()
@@ -90,45 +81,35 @@ class RegexBuilderTest
     @Test
     fun ip4Valid()
     {
+        fun RegexpBuilder.groupPattern()
+        {
+            nonCapturingGroup()
+            {
+                string("25")
+                characterClass{range('0', '5')}
+                or()
+                character('2')
+                characterClass{range('0', '4')}
+                characterClass{range('0', '9')}
+                or()
+                characterClass{string("01")}
+                missingOrOne()
+                characterClass{range('0', '9')}
+                characterClass{range('0', '9')}
+                missingOrOne()
+            }
+        }
         val actual =
             makeRegexpAsString()
             {
                 wordBoundary()
                 nonCapturingGroup()
                 {
-                    nonCapturingGroup()
-                    {
-                        string("25")
-                        characterClass{range('0', '5')}
-                        or()
-                        character('2')
-                        characterClass{range('0', '4')}
-                        characterClass{range('0', '9')}
-                        or()
-                        characterClass{string("01")}
-                        missingOrOne()
-                        characterClass{range('0', '9')}
-                        characterClass{range('0', '9')}
-                        missingOrOne()
-                    }
+                    groupPattern()
                     character('.')
                 }
                 nExactly(3)
-                nonCapturingGroup()
-                {
-                    string("25")
-                    characterClass{range('0', '5')}
-                    or()
-                    character('2')
-                    characterClass{range('0', '4')}
-                    characterClass{range('0', '9')}
-                    or()
-                    characterClass{string("01")}
-                    missingOrOne()
-                    characterClass{range('0', '9')}
-                    characterClass{range('0', '9')}
-                    missingOrOne()
-                }
+                groupPattern()
                 wordBoundary()
             }
             
